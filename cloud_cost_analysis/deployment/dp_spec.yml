@@ -1,0 +1,54 @@
+name: cloud-cost-mapping-dp
+version: v1beta
+entity: product
+type: data
+tags:
+  - DPDomain.CloudOps
+  - DPUsecase.Cloud Cost Analysis
+  - DPTier.Source Aligned
+
+description: Cloud cost mapping analysis
+
+refs:
+- title: Cloud Cost Mapping
+  href: https://github.com/Acies-Nivedhaa/TMDC-Gungroo
+
+v1beta:
+  data:
+    meta:
+      title: Cloud Cost Mapping
+      sourceCodeUrl: https://github.com/Acies-Nivedhaa/TMDC-Gungroo
+ 
+    collaborators:
+      - name: acies04
+        description: owner
+    
+    resource:
+      refType: dataos
+      ref: bundle:v1beta:cloud-cost-analysis-bundle
+
+    inputs:
+      - refType: dataos
+        ref: dataos://thirdparty01:cloud_cost/azure/DataPoint_AzureCost_JulyToSept2024_LastOne.xlsx
+
+      - refType: dataos
+        ref: dataos://thirdparty01:cloud_cost/snowflake/SF_CostResults_JulyToSept2024_LatestOne.xlsx
+
+      - refType: dataos
+        ref: dataos://thirdparty01:cloud_cost/gcp/simulated_gcp_billing_data.csv
+
+    outputs:
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/azure_cost
+
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/snowflake_cost
+
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/gcp_cost
+
+
+    ports:
+      lens:
+        ref: lens:v1alpha:cloud_cost_mapping_lens:public
+        refType: dataos 

@@ -1,0 +1,93 @@
+tables:
+  - name: snowflake_billing
+    sql: {{ load_sql('snowflake_billing') }}
+    description: "Detailed usage and billing data extracted from Snowflake warehouses, including region, team allocation, credits, and monetary cost for each billing cycle."
+    public: true
+
+    joins:
+      - name: azure_billing
+        relationship: one_to_one
+        sql: "{TABLE.sf_allocation}={azure_billing.azure_allocation}" 
+
+    #   - name: modem_prediction
+    #     relationship: many_to_one
+    #     sql: "{TABLE.modem_id}={modem_prediction.modem_id}"
+
+    dimensions:
+      - name: sf_start_time
+        column: sf_start_time
+        type: time
+        description: "The start date of the Snowflake warehouse usage session."
+        primary_key: true
+
+      - name: sf_end_time
+        column: sf_end_time
+        type: time
+        description: "The end date of the Snowflake warehouse usage session."
+
+      - name: sf_region
+        column: sf_region
+        type: string
+        description: "Snowflake region where the warehouse is deployed."
+
+      - name: sf_globallocal
+        column: sf_globallocal
+        type: string
+        description: "Indicates whether the warehouse is globally or locally provisioned (geographical context)."
+
+      - name: sf_accountname
+        column: sf_accountname
+        type: string
+        description: "Name of the Snowflake account under which the warehouse activity and billing occurred."
+
+      - name: sf_warehousename
+        column: sf_warehousename
+        type: string
+        description: "Identifier for the compute warehouse where the cost was generated."
+
+      - name: sf_credits_used
+        column: sf_credits_used
+        type: number
+        description: "Number of Snowflake credits consumed during the session."
+
+      - name: sf_amount
+        column: sf_amount
+        type: number
+        description: "Actual billed cost (monetary) corresponding to the credits used."
+
+      - name: sf_chargeback
+        column: sf_chargeback
+        type: string
+        description: "Optional chargeback code or logic used for internal cost redistribution."
+
+      - name: sf_country
+        column: sf_country
+        type: string
+        description: "Country associated with the Snowflake usage, often derived from the account or region metadata."
+
+      - name: sf_allocation
+        column: sf_allocation
+        type: string
+        description: "Name of the team or department to which the cost is mapped."
+
+    measures:
+      - name: total_cost
+        title: Total Snowflake Cost
+        sql: SUM(sf_amount)
+        type: number
+        description: "Total Snowflake cloud cost across all records."
+        public: true
+
+      - name: chargeback_percent
+        title: Snowflake Chargeback Percent
+        sql: AVG(sf_chargeback)
+        type: number
+        description: "Average chargeback percent for Snowflake (if numeric, else placeholder)."
+        public: true
+
+      # - name: forecasted_cost
+      #   title: Forecasted Snowflake Cost (Placeholder)
+      #   sql: NULL
+      #   type: number
+      #   description: "Placeholder for forecasted Snowflake cost."
+      #   public: false

@@ -1,0 +1,84 @@
+name: snowflake-quality-checks
+version: v1
+type: workflow
+tags:
+  - workflow
+  - soda-checks
+  - Cloud Cost Analysis
+  - Snowflake
+description: The role involves conducting thorough and detailed quality analysis, including data assertion, of azure billing data using the advanced features of the DataOS platform.
+workspace: public
+workflow:
+  # schedule:
+  #  cron: '*/5 * * * *'
+  #  concurrencyPolicy: Forbid
+  dag:
+    - name: snowflake-soda
+      description: The role involves conducting thorough and detailed quality analysis, including data assertion, of extensive raw modem data using the advanced features of the DataOS platform.
+      spec:
+        stack:  soda+python:1.0 
+        logLevel: INFO
+        compute: runnable-default
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 250Mi
+          limits:
+            cpu: 1000m
+            memory: 250Mi
+        stackSpec:
+          inputs:
+            - dataset: dataos://lakehouse:nivedhaa/snowflake_cost
+              options:
+                engine: minerva
+                clusterName: miniature
+              checks:
+                # Accuracy
+                - max(sf_amount) <= 1000:
+                    name: Snowflake cost should not exceed 50,000
+                    attributes:
+                      category: Accuracy
+                      title: Monitor unusually high Snowflake charges
+
+                 # Completeness
+                - missing_count(sf_allocation) = 0:
+                    name: All Snowflake usage must be allocated
+                    attributes:
+                      category: Completeness
+                      title: Ensure allocation field is complete
+
+                - missing_count(sf_start_time) = 0:
+                    name: START_TIME must be present
+                    attributes:
+                      category: Completeness
+                      title: Ensure timestamp presence for billing
+
+                # Freshness
+                - freshness(sf_start_time) < 30d:
+                    name: Snowflake data should be fresh within 30 days
+                    attributes:
+                      category: Freshness
+                      title: Verify recent billing data
+
+
+                # Uniqueness
+                - duplicate_count(sf_allocation, sf_start_time, sf_amount) = 0:
+                    name: Avoid duplicate warehouse charges
+                    attributes:
+                      category: Uniqueness
+                      title: Snowflake charges must be unique per time slot
+
+                # Validity
+                - invalid_count(sf_chargeback) = 0:
+                    valid values: ["YES", "NO"]
+                    name: Chargeback must be within accepted codes
+                    attributes:
+                      category: Validity
+                      title: Enforce valid chargeback tagging
+
+                
+              profile:
+                columns:
+                - '*'           
+
+              

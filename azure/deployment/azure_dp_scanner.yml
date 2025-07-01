@@ -1,0 +1,31 @@
+version: v1
+name: azure-data-product-scanner
+type: workflow
+tags:
+  - scanner
+  - data-product
+  - Cloud Cost Analysis
+  - Azure
+description: The job scans azure billing data product
+workflow:
+  # schedule:
+    # cron: '*/20 * * * *'
+    # endOn: '2025-02-05T22:00:00Z'
+    # concurrencyPolicy: Forbid
+  dag:
+    - name: scan-azure-bills
+      description: The job scans azure billing data product
+      spec:
+        tags:
+          - scanner2
+        stack: scanner:2.0
+        compute: runnable-default
+        stackSpec:
+          type: data-product
+          sourceConfig:
+            config:
+              type: DataProduct
+              markDeletedDataProducts: true
+              dataProductFilterPattern:
+                includes:
+                 - azure-data-product

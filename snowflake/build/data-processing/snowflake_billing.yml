@@ -1,0 +1,95 @@
+version: v1  # v1
+name: snowflake-billing-ingestion
+type: workflow
+tags:
+  - Cloud Cost Analysis
+  - Snowflake
+description: Ingesting Snowflake cloud information into lakehouse
+workflow:
+  # schedule:
+  #   cron: '00 20 * * *'
+  #   endOn: '2025-07-30T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: dg-snowflake-data
+      title: Snowflake Billing data Ingestion
+      description: The job ingests azure billing information into lakehouse
+      spec:
+        tags:
+          - Cloud Cost Analysis
+          - Snowflake
+        stack: flare:6.0
+        compute: runnable-default
+        stackSpec:
+          driver:
+            coreLimit: 2000m
+            cores: 1
+            memory: 2000m
+          executor:
+            coreLimit: 2000m
+            cores: 1
+            instances: 1
+            memory: 2000m
+          job:
+            explain: true
+            inputs:
+              - name: snowflake_input
+                dataset: dataos://thirdparty01:cloud_cost/snowflake/SF_CostResults_JulyToSept2024_LatestOne.xlsx?acl=rw
+                format: xlsx
+                options:
+                  dataAddress: "'SF_Results_JulyToSept2024'!A1:K28233" 
+            logLevel: INFO
+            outputs:
+              - name: snowflake_output
+                dataset: dataos://lakehouse:nivedhaa/snowflake_cost
+                format: Iceberg
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+            steps:
+              - sequence:
+                  - name: snowflake_output
+                    sql: >
+                      SELECT
+                          b.ACCOUNT_NAME AS sf_accountname,
+                          b.WAREHOUSE_NAME AS sf_warehousename,
+                          b.region AS sf_region,
+                          b.GLOBAL_LOCAL AS sf_globallocal,
+                          b.START_TIME AS sf_START_TIME,
+                          b.END_TIME AS sf_end_time,
+                          b.CREDITS_USED AS sf_credits_used,
+                          b.AMOUNT AS sf_amount,
+                          b.CHARGEBACK AS sf_chargeback,
+                          b.COUNTRY AS sf_country,
+                          -- Standardize allocation names from Snowflake
+                          CASE 
+                              WHEN b.ALLOCATION IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
+                              WHEN b.ALLOCATION = 'EHSSURVEY' THEN 'EHSSURVEY'
+                              WHEN b.ALLOCATION = 'EHS' THEN 'EHSSURVEY'
+                              WHEN b.ALLOCATION IN ('GLOBAL ENGG', 'GLOBAL') THEN 'GLOBAL'
+                              WHEN b.ALLOCATION IN ('JDE', 'JDEINTEGRATION', 'JDEINTEGRATION-EMEA-PROD-WH') THEN 'JDE'
+                              WHEN b.ALLOCATION IN ('K2', 'OAKK2') THEN 'K2'
+                              WHEN b.ALLOCATION IN ('EMEA DASHBOARD', 'LOCAL DASHBOARD') THEN 'LOCAL DASHBOARD'
+                              WHEN b.ALLOCATION IN ('MYMOD', 'MOD', 'MODPRODUCT') THEN 'MODPRODUCT'
+                              WHEN b.ALLOCATION = 'SAP ARCHIVE' THEN 'SAPARCHIVE'
+                              WHEN b.ALLOCATION = 'TALEND' THEN 'TALENDDM'
+                              WHEN b.ALLOCATION = 'TPP PPER' THEN 'TPP'
+                              WHEN b.ALLOCATION = 'UNIT HEALTH' THEN 'UNITHEALTH'
+                              WHEN b.ALLOCATION = 'NAABO' THEN 'NAABO'
+                              WHEN b.ALLOCATION = 'OPXL' THEN 'OPXL'
+                              WHEN b.ALLOCATION = 'PSR' THEN 'PSR'
+                              WHEN b.ALLOCATION = 'QLIK' THEN 'QLIK'
+                              WHEN b.ALLOCATION = 'QLIK CATALOG' THEN 'QLIK CATALOG'
+                              WHEN b.ALLOCATION = 'SERVICESALES' THEN 'SERVICESALES'
+                              WHEN b.ALLOCATION = 'SPEND' THEN 'SPEND'
+                              WHEN b.ALLOCATION = 'SSD' THEN 'SSD'
+                              WHEN b.ALLOCATION = 'WORKDAY' THEN 'WORKDAY'
+                              WHEN b.ALLOCATION = 'ZUDY' THEN 'APPLICATION - ZUDY'
+                              ELSE b.ALLOCATION
+                          END AS sf_allocation
+                      FROM
+                          snowflake_input b
+

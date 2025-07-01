@@ -1,0 +1,31 @@
+version: v1
+name: gcp-data-product-scanner
+type: workflow
+tags:
+  - scanner
+  - data-product
+  - Cloud Cost Analysis
+  - GCP
+description: The job scans GCP billing data product
+workflow:
+  # schedule:
+  #   cron: '*/20 * * * *'
+  #   endOn: '2025-02-05T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: scan-gcp-bills
+      description: The job scans GCP billing data product
+      spec:
+        tags:
+          - scanner2
+        stack: scanner:2.0
+        compute: runnable-default
+        stackSpec:
+          type: data-product
+          sourceConfig:
+            config:
+              type: DataProduct
+              markDeletedDataProducts: true
+              dataProductFilterPattern:
+                includes:
+                 - gcp-data-product

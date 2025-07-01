@@ -1,0 +1,82 @@
+name: gcp-quality-checks
+version: v1
+type: workflow
+tags:
+  - workflow
+  - soda-checks
+  - Cloud Cost Analysis
+  - GCP
+description: The role involves conducting thorough and detailed quality analysis, including data assertion, of GCP billing data using the advanced features of the DataOS platform.
+workspace: public
+workflow:
+  # schedule:
+  #  cron: '*/5 * * * *'
+  #  concurrencyPolicy: Forbid
+  dag:
+    - name: gcp-soda
+      description: The role involves conducting thorough and detailed quality analysis, including data assertion, of GCP billing data using the advanced features of the DataOS platform.
+      spec:
+        stack:  soda+python:1.0 
+        logLevel: INFO
+        compute: runnable-default
+        resources:
+          requests:
+            cpu: 200m
+            memory: 250Mi
+          limits:
+            cpu: 200m
+            memory: 250Mi
+        stackSpec:
+          inputs:
+            - dataset: dataos://lakehouse:nivedhaa/gcp_billing_table?acl=rw
+              options:
+                engine: minerva
+                clusterName: miniature
+              checks:
+                # Accuracy
+                - max(gcp_cost) < 1000:
+                    name: GCP cost should not exceed threshold
+                    attributes:
+                      category: Accuracy
+                      title: Detect abnormally high GCP costs
+
+                 # Completeness
+                - missing_count(gcp_allocation) = 0:
+                    name: Allocation should not be null
+                    attributes:
+                      category: Completeness
+                      title: Ensure all GCP costs are allocated to teams
+
+                - missing_count(usage_start_time) = 0:
+                    name: UsageDate must be present for all entries
+                    attributes:
+                      category: Completeness
+                      title: Enforce completeness of usage dates
+
+                # Freshness
+                - freshness(usage_start_time) < 30d:
+                    name: GCP data should be updated within 30 days
+                    attributes:
+                      category: Freshness
+                      title: Validate data timeliness
+
+                # Uniqueness
+                - duplicate_count(gcp_project_name, usage_start_time, gcp_cost) = 0:
+                    name: Ensure no duplicate GCP cost records
+                    attributes:
+                      category: Uniqueness
+                      title: Prevent duplicated GCP cost rows
+
+                # Validity
+                - invalid_count(gcp_region) = 0:
+                    valid values: [EMEA, APAC, CHINA, WHQ, NAA, GLOBAL]
+                    name: Region should be valid GCP region
+                    attributes:
+                      category: Validity
+                      title: GCP region must be valid
+                
+              profile:
+                columns:
+                - '*'           
+
+              

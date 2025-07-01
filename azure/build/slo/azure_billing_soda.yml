@@ -1,0 +1,82 @@
+name: azure-quality-checks
+version: v1
+type: workflow
+tags:
+  - workflow
+  - soda-checks
+  - Cloud Cost Analysis
+  - Azure
+description: The role involves conducting thorough and detailed quality analysis, including data assertion, of azure billing data using the advanced features of the DataOS platform.
+workspace: public
+workflow:
+  # schedule:
+  #  cron: '*/5 * * * *'
+  #  concurrencyPolicy: Forbid
+  dag:
+    - name: azure-soda
+      description: The role involves conducting thorough and detailed quality analysis, including data assertion, of extensive raw modem data using the advanced features of the DataOS platform.
+      spec:
+        stack:  soda+python:1.0 
+        logLevel: INFO
+        compute: runnable-default
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 250Mi
+          limits:
+            cpu: 1000m
+            memory: 250Mi
+        stackSpec:
+          inputs:
+            - dataset: dataos://lakehouse:nivedhaa/azure_cost
+              options:
+                engine: minerva
+                clusterName: miniature
+              checks:
+                # Accuracy
+                - max(azure_cost) < 1000:
+                    name: Azure cost should not exceed threshold
+                    attributes:
+                      category: Accuracy
+                      title: "Detect abnormally high Azure costs"
+
+                 # Completeness
+                - missing_count(standardized_allocation) = 0:
+                    name: Allocation should not be null
+                    attributes:
+                      category: Completeness
+                      title: "Ensure all Azure costs are allocated to teams"
+
+                - missing_count(azure_usagedate) = 0:
+                    name: UsageDate must be present for all entries
+                    attributes:
+                      category: Completeness
+                      title: "Enforce completeness of usage dates"
+
+                # Freshness
+                - freshness(azure_usagedate) < 30d:
+                    name: Azure data should be updated within 30 days
+                    attributes:
+                      category: Freshness
+                      title: "Validate data timeliness"
+
+                # Uniqueness
+                - duplicate_count(azure_subscription_name, azure_usagedate, azure_cost) = 0:
+                    name: Ensure no duplicate Azure cost records
+                    attributes:
+                      category: Uniqueness
+                      title: "Prevent duplicated Azure cost rows"
+
+                # Validity
+                - invalid_count(azure_region) = 0:
+                    valid values: [EMEA, APAC, CHINA, WHQ, NAA, GLOBAL]
+                    name: Region should be valid Azure region
+                    attributes:
+                      category: Validity
+                      title: "Azure region must be valid"
+                
+              profile:
+                columns:
+                - '*'           
+
+              

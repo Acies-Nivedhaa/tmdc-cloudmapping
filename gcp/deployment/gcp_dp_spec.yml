@@ -1,0 +1,36 @@
+name: gcp-data-product
+version: v1beta
+entity: product
+type: data
+tags:
+  - DPDomain.CloudOps
+  - DPUsecase.Cloud Cost Analysis
+  - DPTier.Source Aligned
+
+description: Analysing GCP Bills and do cost mapping analysis
+
+# refs:
+# - title: 
+#   href: https://dataos.info/interfaces/cli/command_reference/#workspace
+
+v1beta:
+  data:
+    meta:
+      title: GCP Monthly Cost Extract
+      #sourceCodeUrl: 
+ 
+    collaborators:
+      - name: acies04
+        description: owner
+    
+    resource:
+      refType: dataos
+      ref: bundle:v1beta:gcp-billing-bundle
+
+    inputs:
+      - refType: dataos
+        ref: dataos://thirdparty01:cloud_cost/gcp/simulated_gcp_billing_data.csv
+
+    outputs:
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/gcp_billing_table

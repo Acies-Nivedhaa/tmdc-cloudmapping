@@ -1,0 +1,14 @@
+name: gcp-billing-bundle
+version: v1beta
+type: bundle
+tags:
+  - dataproduct
+  - Cloud Cost Analysis
+  - GCP 
+description: This bundle resource is for Cloud Cost Analysis data product's source aligned DP (GCP)
+layer: "user"
+bundle:
+  resources:
+    - id: gcp-quality-checks
+      file: C:\Users\Nivedhaa\dataos-ctl-windows-amd64\windows-amd64\tmdc-gungroo\gcp\build\slo\gcp_billing_soda.yml
+      workspace: public

@@ -1,0 +1,186 @@
+# version: v1  # v1
+# name: azure-billing-ingestion
+# type: workflow
+# tags:
+#   - Cloud Cost Analysis
+#   - Azure
+# description: Ingesting Azure cloud information into lakehouse
+# workflow:
+#   # schedule:
+#   #   cron: '00 20 * * *'
+#   #   endOn: '2025-07-30T22:00:00Z'
+#   #   concurrencyPolicy: Forbid
+#   dag:
+#     - name: dg-azure-data
+#       title: Azure Billing data Ingestion
+#       description: The job ingests azure billing information into lakehouse
+#       spec:
+#         tags:
+#           - Cloud Cost Analysis
+#           - Azure
+#         stack: flare:6.0
+#         compute: runnable-default
+#         stackSpec:
+#           driver:
+#             coreLimit: 2000m
+#             cores: 1
+#             memory: 2000m
+#           executor:
+#             coreLimit: 2000m
+#             cores: 1
+#             instances: 1
+#             memory: 2000m
+#           job:
+#             explain: true
+#             inputs:
+#               - name: azure_input
+#                 dataset: dataos://thirdparty01:cloud_cost/azure/DataPoint_AzureCost_JulyToSept2024_LastOne.xlsx?acl=rw
+#                 format: xlsx
+#                 options:
+#                   dataAddress: "'AzureCost_JulyToSept24'!A1:F54636" 
+
+#             logLevel: INFO
+#             outputs:
+#               - name: azure_output
+#                 dataset: dataos://lakehouse:nivedhaa/azure_cost
+#                 format: Iceberg
+#                 options:
+#                   saveMode: overwrite
+#                   iceberg:
+#                     properties:
+#                       write.format.default: parquet
+#                       write.metadata.compression-codec: gzip
+#             steps:
+#               - sequence:
+#                   - name: azure_output
+#                     sql: >
+#                       SELECT
+#                           a.UsageDate AS azure_UsageDate,
+#                           a.region AS azure_region,
+#                           CASE 
+#                               WHEN a.allocation IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
+#                               WHEN a.allocation = 'EHSSURVEY' THEN 'EHSSURVEY'
+#                               WHEN a.allocation = 'EHS' THEN 'EHSSURVEY'
+#                               WHEN a.allocation IN ('GLOBAL ENGG', 'GLOBAL') THEN 'GLOBAL'
+#                               WHEN a.allocation IN ('JDE', 'JDEINTEGRATION', 'JDEINTEGRATION-EMEA-PROD-WH') THEN 'JDE'
+#                               WHEN a.allocation IN ('K2', 'OAKK2') THEN 'K2'
+#                               WHEN a.allocation IN ('EMEA DASHBOARD', 'LOCAL DASHBOARD') THEN 'LOCAL DASHBOARD'
+#                               WHEN a.allocation IN ('MYMOD', 'MOD', 'MODPRODUCT') THEN 'MODPRODUCT'
+#                               WHEN a.allocation = 'SAP ARCHIVE' THEN 'SAPARCHIVE'
+#                               WHEN a.allocation = 'TALEND' THEN 'TALENDDM'
+#                               WHEN a.allocation = 'TPP PPER' THEN 'TPP'
+#                               WHEN a.allocation = 'UNIT HEALTH' THEN 'UNITHEALTH'
+#                               WHEN a.allocation = 'NAABO' THEN 'NAABO'
+#                               WHEN a.allocation = 'OPXL' THEN 'OPXL'
+#                               WHEN a.allocation = 'PSR' THEN 'PSR'
+#                               WHEN a.allocation = 'QLIK' THEN 'QLIK'
+#                               WHEN a.allocation = 'QLIK CATALOG' THEN 'QLIK CATALOG'
+#                               WHEN a.allocation = 'SERVICESALES' THEN 'SERVICESALES'
+#                               WHEN a.allocation = 'SPEND' THEN 'SPEND'
+#                               WHEN a.allocation = 'SSD' THEN 'SSD'
+#                               WHEN a.allocation = 'WORKDAY' THEN 'WORKDAY'
+#                               WHEN a.allocation = 'ZUDY' THEN 'APPLICATION - ZUDY'
+#                               ELSE a.allocation
+#                           END AS standardized_allocation,
+#                           a.SubscriptionName AS azure_subscription_name,
+#                           a.ResourceGroupName AS azure_resource_groupname,
+#                           a.Cost AS azure_cost
+#                       FROM
+#                           azure_input a;
+
+
+version: v1  # v1
+name: azure-billing-ingestion
+type: workflow
+tags:
+  - Cloud Cost Analysis
+  - Azure
+description: Ingesting Azure cloud information into lakehouse
+workflow:
+  # schedule:
+  #   cron: '00 20 * * *'
+  #   endOn: '2025-07-30T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: dg-azure-data
+      title: Azure Billing data Ingestion
+      description: The job ingests azure billing information into lakehouse
+      spec:
+        tags:
+          - Cloud Cost Analysis
+          - Azure
+        stack: flare:6.0
+        compute: runnable-default
+        stackSpec:
+          driver:
+            coreLimit: 2000m
+            cores: 1
+            memory: 2000m
+          executor:
+            coreLimit: 2000m
+            cores: 1
+            instances: 1
+            memory: 2000m
+          job:
+            explain: true
+            inputs:
+              - name: azure_input
+                dataset: dataos://thirdparty01:cloud_cost/azure/DataPoint_AzureCost_JulyToSept2024_LastOne.xlsx?acl=rw
+                format: xlsx
+                options:
+                  header: true
+                  inferSchema: true
+                  dataAddress: "'AzureCost_JulyToSept24'!A1:F54636" 
+
+            logLevel: INFO
+            outputs:
+              - name: azure_output
+                dataset: dataos://lakehouse:nivedhaa/azure_cost?acl=rw
+                format: Iceberg
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+            steps:
+              - sequence:
+                  - name: azure_output
+                    sql: >
+                      SELECT
+                          date_add(to_date('1899-12-30'), cast(a.UsageDate AS int)) AS azure_usage_date,
+                          a.Region AS azure_region,
+                          CASE 
+                              WHEN a.Allocation IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
+                              WHEN a.Allocation = 'EHSSURVEY' THEN 'EHSSURVEY'
+                              WHEN a.Allocation = 'EHS' THEN 'EHSSURVEY'
+                              WHEN a.Allocation IN ('GLOBAL ENGG', 'GLOBAL') THEN 'GLOBAL'
+                              WHEN a.Allocation IN ('JDE', 'JDEINTEGRATION', 'JDEINTEGRATION-EMEA-PROD-WH') THEN 'JDE'
+                              WHEN a.Allocation IN ('K2', 'OAKK2') THEN 'K2'
+                              WHEN a.Allocation IN ('EMEA DASHBOARD', 'LOCAL DASHBOARD') THEN 'LOCAL DASHBOARD'
+                              WHEN a.Allocation IN ('MYMOD', 'MOD', 'MODPRODUCT') THEN 'MODPRODUCT'
+                              WHEN a.Allocation = 'SAP ARCHIVE' THEN 'SAPARCHIVE'
+                              WHEN a.Allocation = 'TALEND' THEN 'TALENDDM'
+                              WHEN a.Allocation = 'TPP PPER' THEN 'TPP'
+                              WHEN a.Allocation = 'UNIT HEALTH' THEN 'UNITHEALTH'
+                              WHEN a.Allocation = 'NAABO' THEN 'NAABO'
+                              WHEN a.Allocation = 'OPXL' THEN 'OPXL'
+                              WHEN a.Allocation = 'PSR' THEN 'PSR'
+                              WHEN a.Allocation = 'QLIK' THEN 'QLIK'
+                              WHEN a.Allocation = 'QLIK CATALOG' THEN 'QLIK CATALOG'
+                              WHEN a.Allocation = 'SERVICESALES' THEN 'SERVICESALES'
+                              WHEN a.Allocation = 'SPEND' THEN 'SPEND'
+                              WHEN a.Allocation = 'SSD' THEN 'SSD'
+                              WHEN a.Allocation = 'WORKDAY' THEN 'WORKDAY'
+                              WHEN a.Allocation = 'ZUDY' THEN 'APPLICATION - ZUDY'
+                              ELSE a.Allocation
+                          END AS standardized_allocation,
+                          a.SubscriptionName AS azure_subscription_name,
+                          a.ResourceGroupName AS azure_resource_groupname,
+                          a.Cost AS azure_cost
+                      FROM
+                          azure_input a
+
+
+
+ 

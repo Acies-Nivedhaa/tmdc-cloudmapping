@@ -1,0 +1,34 @@
+name: snowflake-data-product
+version: v1beta
+entity: product
+type: data
+tags:
+  - DPDomain.CloudOps
+  - DPUsecase.Cloud Cost Analysis
+  - DPTier.Source Aligned
+
+description: Analysing Snowflake Bills and do cost mapping analysis
+
+# refs:
+# - title: 
+#   href: https://dataos.info/interfaces/cli/command_reference/#workspace
+
+v1beta:
+  data:
+    meta:
+      title: Snowflake Monthly Cost Extract
+ 
+    collaborators:
+      - name: acies04
+        description: owner
+    
+    resource:
+      refType: dataos
+      ref: bundle:v1beta:snowflake-bundle
+
+    inputs:
+      - refType: dataos
+        ref: dataos://thirdparty01:cloud_cost/snowflake/SF_CostResults_JulyToSept2024_LatestOne.xlsx
+    outputs:
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/snowflake_cost

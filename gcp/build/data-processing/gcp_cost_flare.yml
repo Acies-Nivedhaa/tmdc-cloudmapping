@@ -1,0 +1,96 @@
+version: v1  # v1
+name: gcp-billing-ingestion-flare
+type: workflow
+tags:
+  - Cloud Cost Analysis
+  - GCP
+description: Ingesting GCP cloud information into lakehouse
+workflow:
+  # schedule:
+  #   cron: '00 20 * * *'
+  #   endOn: '2025-07-30T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: dg-gcp-billing-dag-1
+      title: GCP Billing data Ingestion
+      description: The job ingests GCP billing information into lakehouse
+      spec:
+        tags:
+          - Cloud Cost Analysis
+          - Azure
+        stack: flare:6.0
+        compute: runnable-default
+        stackSpec:
+          driver:
+            coreLimit: 1200m
+            cores: 1
+            memory: 1200m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1200m
+          job:
+            explain: true
+            inputs:
+              - name: gcp_input
+                dataset: dataos://thirdparty01:cloud_cost/gcp/simulated_gcp_billing_data.csv?acl=rw
+                format: csv
+                options:
+                  header: true
+                  sep: ','
+
+            logLevel: INFO
+            outputs:
+              - name: gcp_output
+                dataset: dataos://lakehouse:nivedhaa/gcp_billing_table?acl=rw
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+            steps:
+              - sequence:
+                  - name: gcp_output
+                    sql: >
+                      SELECT
+                          a.usage_start_time,
+                          a.region AS gcp_region,
+                          a.project_name AS gcp_project_name,
+                          a.service_description AS gcp_service_description,
+                          a.usage_amount AS gcp_usage_amount,
+                          a.usage_unit AS gcp_usage_unit,
+                          a.cost AS gcp_cost,
+                          a.credits_amount AS gcp_credits_amount,
+                          a.final_cost AS gcp_final_cost,
+                          CASE 
+                              WHEN a.allocation IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
+                              WHEN a.allocation = 'EHSSURVEY' THEN 'EHSSURVEY'
+                              WHEN a.allocation = 'EHS' THEN 'EHSSURVEY'
+                              WHEN a.allocation IN ('GLOBAL ENGG', 'GLOBAL') THEN 'GLOBAL'
+                              WHEN a.allocation IN ('JDE', 'JDEINTEGRATION', 'JDEINTEGRATION-EMEA-PROD-WH') THEN 'JDE'
+                              WHEN a.allocation IN ('K2', 'OAKK2') THEN 'K2'
+                              WHEN a.allocation IN ('EMEA DASHBOARD', 'LOCAL DASHBOARD') THEN 'LOCAL DASHBOARD'
+                              WHEN a.allocation IN ('MYMOD', 'MOD', 'MODPRODUCT') THEN 'MODPRODUCT'
+                              WHEN a.allocation = 'SAP ARCHIVE' THEN 'SAPARCHIVE'
+                              WHEN a.allocation = 'TALEND' THEN 'TALENDDM'
+                              WHEN a.allocation = 'TPP PPER' THEN 'TPP'
+                              WHEN a.allocation = 'UNIT HEALTH' THEN 'UNITHEALTH'
+                              WHEN a.allocation = 'NAABO' THEN 'NAABO'
+                              WHEN a.allocation = 'OPXL' THEN 'OPXL'
+                              WHEN a.allocation = 'PSR' THEN 'PSR'
+                              WHEN a.allocation = 'QLIK' THEN 'QLIK'
+                              WHEN a.allocation = 'QLIK CATALOG' THEN 'QLIK CATALOG'
+                              WHEN a.allocation = 'SERVICESALES' THEN 'SERVICESALES'
+                              WHEN a.allocation = 'SPEND' THEN 'SPEND'
+                              WHEN a.allocation = 'SSD' THEN 'SSD'
+                              WHEN a.allocation = 'WORKDAY' THEN 'WORKDAY'
+                              WHEN a.allocation = 'ZUDY' THEN 'APPLICATION - ZUDY'
+                              ELSE a.allocation
+                          END AS gcp_allocation
+                      FROM
+                          gcp_input a;
+
+
+

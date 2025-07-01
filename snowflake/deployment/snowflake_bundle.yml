@@ -1,0 +1,14 @@
+name: snowflake-bundle
+version: v1beta
+type: bundle
+tags:
+  - dataproduct
+  - Cloud Cost Analysis
+  - Snowflake 
+description: This bundle resource is for Cloud Cost Analysis data product's source aligned DP (Snowflake)
+layer: "user"
+bundle:
+  resources:
+    - id: snowflake-quality-checks
+      file: C:\Users\Nivedhaa\dataos-ctl-windows-amd64\windows-amd64\tmdc-gungroo\snowflake\build\slo\snowflake_billing_soda.yml
+      workspace: public

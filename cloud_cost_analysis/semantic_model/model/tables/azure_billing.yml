@@ -1,0 +1,64 @@
+tables:
+  - name: azure_billing
+    sql: {{ load_sql('azure_billing') }}
+    description: "Raw Azure billing extract capturing team-level cost, region, and resource metadata for cloud usage analysis."
+    public: true
+
+    joins:
+      - name: gcp_billing
+        relationship: one_to_one
+        sql: "{TABLE.azure_allocation}={gcp_billing.gcp_allocation}" 
+
+
+    dimensions:
+      - name: azure_usage_date
+        column: azure_usage_date
+        type: time
+        description: "The date when the Azure resource usage was recorded"
+
+      - name: azure_region
+        column: azure_region
+        type: string
+        description: "The Azure region where the resource was deployed"
+
+      - name: standardized_allocation
+        column: standardized_allocation
+        type: string
+        description: "The standardized team or department responsible for the cloud spend"
+
+      - name: azure_subscription_name
+        column: azure_subscription_name
+        type: string
+        description: "The name of the Azure subscription under which the cost was incurred"
+
+      - name: azure_resource_groupname
+        column: azure_resource_groupname
+        type: string
+        description: "The Azure resource group name used to logically group related resources"
+
+      - name: azure_cost
+        column: azure_cost
+        type: number
+        description: "The actual monetary cost incurred for the associated Azure resource usage on the given date"
+      
+    measures:
+      - name: total_cost
+        title: Total Cloud Cost
+        sql: SUM(azure_cost)
+        type: number
+        description: "Total Azure cloud cost across all records."
+        public: true
+
+      # - name: chargeback_percent
+      #   title: Azure Chargeback Percent (Placeholder)
+      #   sql: NULL
+      #   type: number
+      #   description: "Placeholder for Azure chargeback percent."
+      #   public: false
+
+      # - name: forecasted_cost
+      #   title: Forecasted Azure Cost (Placeholder)
+      #   sql: NULL
+      #   type: number
+      #   description: "Placeholder for forecasted Azure cost."
+      #   public: false

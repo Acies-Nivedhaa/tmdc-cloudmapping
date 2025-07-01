@@ -1,0 +1,76 @@
+tables:
+  - name: gcp_billing
+    sql: {{ load_sql('gcp_billing_table') }}
+    description: "Raw GCP billing extract capturing team-level cost, region, and resource metadata for cloud usage analysis."
+    public: true
+
+
+
+
+    dimensions:
+      - name: usage_start_time
+        column: usage_start_time
+        type: time
+        description: "The date when the GCP cloud resource usage occurred."
+        primary_key: true
+
+      - name: gcp_region
+        column: gcp_region
+        type: string
+        description: "Geographic region where the GCP usage occurred."
+
+      - name: gcp_project_name
+        column: gcp_project_name
+        type: string
+        description: "Name of the GCP project the resource usage is associated with."
+
+      - name: gcp_service_description
+        column: gcp_service_description
+        type: string
+        description: "Description of the GCP cloud service being used."
+
+      - name: gcp_usage_amount
+        column: gcp_usage_amount
+        type: number
+        description: "Quantity of GCP resource consumed."
+
+      - name: gcp_usage_unit
+        column: gcp_usage_unit
+        type: string
+        description: "Unit of measurement for the GCP resource usage."
+
+      - name: gcp_cost
+        column: gcp_cost
+        type: number
+        description: "Gross cost of GCP usage before any discounts or credits are applied."
+
+      - name: gcp_credits_amount
+        column: gcp_credits_amount
+        type: number
+        description: "Amount of GCP credits (e.g., promotional, committed use discounts) applied."        
+
+      - name: gcp_final_cost
+        column: gcp_final_cost
+        type: number
+        description: "Net cost after GCP credits are subtracted from the gross cost."
+
+      - name: gcp_allocation
+        column: gcp_allocation
+        type: string
+        description: "Mapped team, department, or purpose to which the GCP cost is allocated."        
+
+      
+    measures:
+      - name: total_cost
+        title: Total GCP Cost
+        sql: SUM(gcp_final_cost)
+        type: number
+        description: "Total GCP cloud cost across all records."
+        public: true
+
+      # - name: forecasted_cost
+      #   title: Forecasted GCP Cost (Placeholder)
+      #   sql: NULL
+      #   type: number
+      #   description: "Placeholder for forecasted GCP cost."
+      #   public: false

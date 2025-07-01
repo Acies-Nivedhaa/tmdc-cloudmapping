@@ -1,0 +1,31 @@
+version: v1
+name: snowflake-data-product-scanner
+type: workflow
+tags:
+  - scanner
+  - data-product
+  - Cloud Cost Analysis
+  - Snowflake
+description: The job scans Snowflake billing data product
+workflow:
+  # schedule:
+  #   cron: '*/20 * * * *'
+  #   endOn: '2025-02-05T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: scan-snowflake-billing
+      description: The job scans Snowflake billing data product
+      spec:
+        tags:
+          - scanner
+        stack: scanner:2.0
+        compute: runnable-default
+        stackSpec:
+          type: data-product
+          sourceConfig:
+            config:
+              type: DataProduct
+              markDeletedDataProducts: true
+              dataProductFilterPattern:
+                includes:
+                 - snowflake-data-product

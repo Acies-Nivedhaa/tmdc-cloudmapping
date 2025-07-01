@@ -1,0 +1,14 @@
+name: cloud-cost-analysis-bundle
+version: v1beta
+type: bundle
+tags:
+  - dataproduct
+  - Cloud Cost Analysis
+  - Azure 
+description: This bundle resource is for Cloud cost analysis data product's consumer aligned DP
+layer: "user"
+bundle:
+  resources:
+    - id: cloud_cost_mapping_lens
+      file: C:\Users\Nivedhaa\dataos-ctl-windows-amd64\windows-amd64\tmdc-gungroo\cloud_cost_analysis\semantic_model\lens-deployment.yml
+      workspace: public

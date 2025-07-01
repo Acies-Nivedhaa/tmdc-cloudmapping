@@ -1,0 +1,31 @@
+version: v1
+name: cloud-cost-mapping-dp-scanner
+type: workflow
+tags:
+  - scanner
+  - data-product
+  - Cloud Cost Analysis
+  - Azure 
+description: The job scans cloud cost mapping data product
+workflow:
+  schedule:
+    cron: '*/20 * * * *'
+    endOn: '2025-02-05T22:00:00Z'
+    concurrencyPolicy: Forbid
+  dag:
+    - name: scan-cloud-cost-mapping-dp
+      description: The job scans device health dp
+      spec:
+        tags:
+          - scanner2
+        stack: scanner:2.0
+        compute: runnable-default
+        stackSpec:
+          type: data-product
+          sourceConfig:
+            config:
+              type: DataProduct
+              markDeletedDataProducts: true
+              dataProductFilterPattern:
+                includes:
+                 - cloud-cost-mapping-dp
