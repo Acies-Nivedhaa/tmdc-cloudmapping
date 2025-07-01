@@ -57,7 +57,9 @@ tables:
       - name: gcp_allocation
         column: gcp_allocation
         type: string
-        description: "Mapped team, department, or purpose to which the GCP cost is allocated."        
+        description: "Mapped team, department, or purpose to which the GCP cost is allocated."
+        primary_key: true
+        public: true       
 
       
     measures:

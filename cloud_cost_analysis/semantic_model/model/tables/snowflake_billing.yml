@@ -69,6 +69,8 @@ tables:
         column: sf_allocation
         type: string
         description: "Name of the team or department to which the cost is mapped."
+        primary_key: true
+        public: true
 
     measures:
       - name: total_cost

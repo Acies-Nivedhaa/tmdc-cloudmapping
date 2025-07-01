@@ -25,6 +25,8 @@ tables:
         column: standardized_allocation
         type: string
         description: "The standardized team or department responsible for the cloud spend"
+        primary_key: true
+        public: true
 
       - name: azure_subscription_name
         column: azure_subscription_name

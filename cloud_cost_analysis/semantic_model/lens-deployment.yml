@@ -21,10 +21,10 @@ lens:
     catalog: lakehouse # Catalog name for the depot
     
   repo: # Lens model code repository configuration (mandatory)
-    url: https://github.com/Acies-Nivedhaa/TMDC-Gungroo/ # URL of repository containing the Lens model (mandatory)
-    lensBaseDir: TMDC-Gungroo/cloud_cost_analysis/semantic_model/model # Relative path of the Lens 'model' directory in repository (mandatory)
+    url: https://github.com/Acies-Nivedhaa/tmdc-cloudmapping # URL of repository containing the Lens model (mandatory)
+    lensBaseDir: tmdc-cloudmapping/cloud_cost_analysis/semantic_model/model # Relative path of the Lens 'model' directory in repository (mandatory)
     syncFlags: # Additional flags used during synchronization (optional)
-      - --ref=master # Repository Branch (optional)
+      - --ref=main # Repository Branch (optional)
 # API Instances configuration
   api:  #(optional)
     replicas: 1 # Number of API instance replicas (optional)
