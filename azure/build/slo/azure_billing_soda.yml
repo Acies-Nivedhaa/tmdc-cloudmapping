@@ -47,21 +47,21 @@ workflow:
                       category: Completeness
                       title: "Ensure all Azure costs are allocated to teams"
 
-                - missing_count(azure_usagedate) = 0:
+                - missing_count(azure_usage_date) = 0:
                     name: UsageDate must be present for all entries
                     attributes:
                       category: Completeness
                       title: "Enforce completeness of usage dates"
 
                 # Freshness
-                - freshness(azure_usagedate) < 30d:
+                - freshness(azure_usage_date) < 30d:
                     name: Azure data should be updated within 30 days
                     attributes:
                       category: Freshness
                       title: "Validate data timeliness"
 
                 # Uniqueness
-                - duplicate_count(azure_subscription_name, azure_usagedate, azure_cost) = 0:
+                - duplicate_count(azure_subscription_name, azure_usage_date, azure_cost) = 0:
                     name: Ensure no duplicate Azure cost records
                     attributes:
                       category: Uniqueness

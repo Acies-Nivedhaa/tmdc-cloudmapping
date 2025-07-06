@@ -1,0 +1,118 @@
+tables:
+  - name: combined_cloud_tables
+    sql: {{ load_sql('combined_cloud_tables') }}
+    description: "Combined cloud cost analysis table aggregating monthly costs across Azure, GCP, and Snowflake by allocation and year/month."
+    public: true
+    
+    joins:
+      - name: azure_billing
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={azure_billing.standardized_allocation} AND {TABLE.usage_year}={azure_billing.usage_year} AND {TABLE.usage_month}={azure_billing.usage_month}"
+
+      - name: gcp_billing
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={gcp_billing.gcp_allocation} AND {TABLE.usage_year}={gcp_billing.usage_year} AND {TABLE.usage_month}={gcp_billing.usage_month}"
+
+      - name: snowflake_billing
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={snowflake_billing.sf_allocation} AND {TABLE.usage_year}={snowflake_billing.sf_year} AND {TABLE.usage_month}={snowflake_billing.sf_month}" 
+
+
+    dimensions:
+      - name: usage_year
+        column: usage_year
+        type: number
+        description: "The year when the cloud resource usage occurred"
+        primary_key: true
+        public: true
+
+      - name: usage_month
+        column: usage_month
+        type: number
+        description: "The month when the cloud resource usage occurred"
+        primary_key: true
+        public: true
+
+      - name: allocation
+        column: allocation
+        type: string
+        description: "The standardized team or department responsible for the cloud spend across all providers"
+        primary_key: true
+        public: true
+
+      - name: azure_cost
+        column: azure_cost
+        type: number
+        description: "The total Azure cloud cost for the given year, month, and allocation"
+
+      - name: snowflake_cost
+        column: snowflake_cost
+        type: number
+        description: "The total Snowflake cloud cost for the given year, month, and allocation"
+
+      - name: gcp_cost
+        column: gcp_cost
+        type: number
+        description: "The total GCP cloud cost for the given year, month, and allocation"
+
+      - name: total_cost
+        column: total_cost
+        type: number
+        description: "The combined total cost across all cloud providers for the given year, month, and allocation"
+      
+    measures:
+      - name: total_combined_cost
+        title: Total Combined Cloud Cost
+        sql: SUM({TABLE.total_cost})
+        type: number
+        description: "Total combined cloud cost across all providers, years, months, and allocations."
+        public: true
+
+      - name: total_azure_cost
+        title: Total Azure Cost
+        sql: SUM({TABLE.azure_cost})
+        type: number
+        description: "Total Azure cloud cost across all records."
+        public: true
+
+      - name: total_gcp_cost
+        title: Total GCP Cost
+        sql: SUM({TABLE.gcp_cost})
+        type: number
+        description: "Total GCP cloud cost across all records."
+        public: true
+
+      - name: total_snowflake_cost
+        title: Total Snowflake Cost
+        sql: SUM({TABLE.snowflake_cost})
+        type: number
+        description: "Total Snowflake cloud cost across all records."
+        public: true
+
+      - name: avg_monthly_cost
+        title: Average Monthly Cost
+        sql: AVG({TABLE.total_cost})
+        type: number
+        description: "Average monthly cost across all cloud providers."
+        public: true
+
+      - name: cost_distribution_azure
+        title: Azure Cost Distribution
+        sql: SUM({TABLE.azure_cost}) / SUM({TABLE.total_cost}) * 100
+        type: number
+        description: "Percentage of total cost attributed to Azure."
+        public: true
+
+      - name: cost_distribution_gcp
+        title: GCP Cost Distribution
+        sql: SUM({TABLE.gcp_cost}) / SUM({TABLE.total_cost}) * 100
+        type: number
+        description: "Percentage of total cost attributed to GCP."
+        public: true
+
+      - name: cost_distribution_snowflake
+        title: Snowflake Cost Distribution
+        sql: SUM({TABLE.snowflake_cost}) / SUM({TABLE.total_cost}) * 100
+        type: number
+        description: "Percentage of total cost attributed to Snowflake."
+        public: true

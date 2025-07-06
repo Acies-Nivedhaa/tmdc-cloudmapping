@@ -28,7 +28,7 @@ workflow:
             memory: 250Mi
         stackSpec:
           inputs:
-            - dataset: dataos://lakehouse:nivedhaa/gcp_billing_table?acl=rw
+            - dataset: dataos://lakehouse:nivedhaa/gcp_bill
               options:
                 engine: minerva
                 clusterName: miniature
@@ -47,21 +47,21 @@ workflow:
                       category: Completeness
                       title: Ensure all GCP costs are allocated to teams
 
-                - missing_count(usage_start_time) = 0:
+                - missing_count(usage_date) = 0:
                     name: UsageDate must be present for all entries
                     attributes:
                       category: Completeness
                       title: Enforce completeness of usage dates
 
                 # Freshness
-                - freshness(usage_start_time) < 30d:
+                - freshness(usage_date) < 30d:
                     name: GCP data should be updated within 30 days
                     attributes:
                       category: Freshness
                       title: Validate data timeliness
 
                 # Uniqueness
-                - duplicate_count(gcp_project_name, usage_start_time, gcp_cost) = 0:
+                - duplicate_count(gcp_project_name, usage_date, gcp_cost) = 0:
                     name: Ensure no duplicate GCP cost records
                     attributes:
                       category: Uniqueness

@@ -1,5 +1,5 @@
 version: v1  # v1
-name: gcp-billing-ingestion-flare
+name: gcp-flare
 type: workflow
 tags:
   - Cloud Cost Analysis
@@ -11,7 +11,7 @@ workflow:
   #   endOn: '2025-07-30T22:00:00Z'
   #   concurrencyPolicy: Forbid
   dag:
-    - name: dg-gcp-billing-dag-1
+    - name: dg-gcp-flare-dag-2
       title: GCP Billing data Ingestion
       description: The job ingests GCP billing information into lakehouse
       spec:
@@ -38,12 +38,13 @@ workflow:
                 format: csv
                 options:
                   header: true
+                  inferSchema: true
                   sep: ','
 
             logLevel: INFO
             outputs:
               - name: gcp_output
-                dataset: dataos://lakehouse:nivedhaa/gcp_billing_table?acl=rw
+                dataset: dataos://lakehouse:nivedhaa/gcp_bill?acl=rw
                 options:
                   saveMode: overwrite
                   iceberg:
@@ -55,15 +56,15 @@ workflow:
                   - name: gcp_output
                     sql: >
                       SELECT
-                          a.usage_start_time,
+                          TO_DATE(a.usage_start_time, 'M/d/yyyy') AS usage_date,
                           a.region AS gcp_region,
                           a.project_name AS gcp_project_name,
                           a.service_description AS gcp_service_description,
-                          a.usage_amount AS gcp_usage_amount,
+                          CAST(a.usage_amount AS DOUBLE) AS gcp_usage_amount,
                           a.usage_unit AS gcp_usage_unit,
-                          a.cost AS gcp_cost,
-                          a.credits_amount AS gcp_credits_amount,
-                          a.final_cost AS gcp_final_cost,
+                          CAST(a.cost AS DOUBLE) AS gcp_cost,
+                          CAST(a.credits_amount AS DOUBLE) AS gcp_credits_amount,
+                          CAST(a.final_cost AS DOUBLE) AS gcp_final_cost,
                           CASE 
                               WHEN a.allocation IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
                               WHEN a.allocation = 'EHSSURVEY' THEN 'EHSSURVEY'
@@ -90,7 +91,4 @@ workflow:
                               ELSE a.allocation
                           END AS gcp_allocation
                       FROM
-                          gcp_input a;
-
-
-
+                          gcp_input a

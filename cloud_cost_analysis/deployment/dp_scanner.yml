@@ -8,10 +8,10 @@ tags:
   - Azure 
 description: The job scans cloud cost mapping data product
 workflow:
-  schedule:
-    cron: '*/20 * * * *'
-    endOn: '2025-02-05T22:00:00Z'
-    concurrencyPolicy: Forbid
+  # schedule:
+  #   cron: '*/20 * * * *'
+  #   endOn: '2025-02-05T22:00:00Z'
+  #   concurrencyPolicy: Forbid
   dag:
     - name: scan-cloud-cost-mapping-dp
       description: The job scans device health dp

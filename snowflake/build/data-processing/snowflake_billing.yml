@@ -37,11 +37,14 @@ workflow:
                 dataset: dataos://thirdparty01:cloud_cost/snowflake/SF_CostResults_JulyToSept2024_LatestOne.xlsx?acl=rw
                 format: xlsx
                 options:
-                  dataAddress: "'SF_Results_JulyToSept2024'!A1:K28233" 
+                  dataAddress: "'SF_Results_JulyToSept2024'!A1:K28233"
+                  header: true
+                  inferSchema: true
+
             logLevel: INFO
             outputs:
               - name: snowflake_output
-                dataset: dataos://lakehouse:nivedhaa/snowflake_cost
+                dataset: dataos://lakehouse:nivedhaa/snowflake_cost?acl=rw
                 format: Iceberg
                 options:
                   saveMode: overwrite
@@ -58,13 +61,12 @@ workflow:
                           b.WAREHOUSE_NAME AS sf_warehousename,
                           b.region AS sf_region,
                           b.GLOBAL_LOCAL AS sf_globallocal,
-                          b.START_TIME AS sf_START_TIME,
-                          b.END_TIME AS sf_end_time,
-                          b.CREDITS_USED AS sf_credits_used,
-                          b.AMOUNT AS sf_amount,
+                          to_date(b.START_TIME, 'dd/MM/yyyy') AS sf_start_time,
+                          to_date(b.END_TIME, 'dd/MM/yyyy') AS sf_end_time,
+                          CAST(b.CREDITS_USED AS DOUBLE) AS sf_credits_used,
+                          CAST(b.AMOUNT AS DOUBLE) AS sf_amount,
                           b.CHARGEBACK AS sf_chargeback,
                           b.COUNTRY AS sf_country,
-                          -- Standardize allocation names from Snowflake
                           CASE 
                               WHEN b.ALLOCATION IN ('ELOG', 'ELOGSIGMA') THEN 'ELOG'
                               WHEN b.ALLOCATION = 'EHSSURVEY' THEN 'EHSSURVEY'
@@ -93,3 +95,4 @@ workflow:
                       FROM
                           snowflake_input b
 
+ 

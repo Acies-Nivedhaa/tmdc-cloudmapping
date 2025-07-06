@@ -33,4 +33,4 @@ v1beta:
 
     outputs:
       - refType: dataos
-        ref: dataos://lakehouse:nivedhaa/gcp_billing_table
+        ref: dataos://lakehouse:nivedhaa/gcp_bill

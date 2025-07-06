@@ -11,13 +11,13 @@ description: Cloud cost mapping analysis
 
 refs:
 - title: Cloud Cost Mapping
-  href: https://github.com/Acies-Nivedhaa/TMDC-Gungroo
+  href: https://github.com/Acies-Nivedhaa/tmdc-cloudmapping
 
 v1beta:
   data:
     meta:
       title: Cloud Cost Mapping
-      sourceCodeUrl: https://github.com/Acies-Nivedhaa/TMDC-Gungroo
+      sourceCodeUrl: https://github.com/Acies-Nivedhaa/tmdc-cloudmapping
  
     collaborators:
       - name: acies04
@@ -45,10 +45,9 @@ v1beta:
         ref: dataos://lakehouse:nivedhaa/snowflake_cost
 
       - refType: dataos
-        ref: dataos://lakehouse:nivedhaa/gcp_cost
-
+        ref: dataos://lakehouse:nivedhaa/gcp_billing_table
 
     ports:
       lens:
-        ref: lens:v1alpha:cloud_cost_mapping_lens:public
+        ref: lens:v1alpha:cloud-cost-mapping-lens:public
         refType: dataos 

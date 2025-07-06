@@ -1,0 +1,106 @@
+version: v1
+name: combined-cloud-tables
+type: workflow
+tags:
+  - combined cloud tables
+  - Cloud Cost Analysis
+description: Joins revenue and cost in the visit table
+workflow:
+  dag:
+    - name: combined-cloud-tables-dag
+      description: Combines Azure, Snowflake and GCP data into a single table
+      spec:
+        tags:
+          - combined-tables
+        stack: flare:6.0
+        compute: query-default
+        stackSpec:
+          driver:
+            coreLimit: 2000m
+            cores: 1
+            memory: 1000m
+          executor:
+            coreLimit: 2000m
+            cores: 1
+            instances: 1
+            memory: 2000m
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: azure_billing
+                dataset: dataos://lakehouse:nivedhaa/azure_cost?acl=rw
+                format: Iceberg
+
+              - name: snowflake_billing
+                dataset: dataos://lakehouse:nivedhaa/snowflake_cost?acl=rw
+                format: Iceberg
+
+              - name: gcp_billing
+                dataset: dataos://lakehouse:nivedhaa/gcp_bill?acl=rw
+                format: Iceberg      
+
+            steps:
+              - sequence:
+                  - name: combined_tables
+                    sql: |
+                      WITH unified_costs AS (
+                        SELECT
+                          EXTRACT(YEAR FROM azure_usage_date) AS usage_year,
+                          EXTRACT(MONTH FROM azure_usage_date) AS usage_month,
+                          standardized_allocation AS allocation,
+                          'Azure' AS cloud_provider,
+                          SUM(azure_cost) AS cloud_cost
+                        FROM azure_billing
+                        GROUP BY 1, 2, 3
+
+                        UNION ALL
+
+                        SELECT
+                          EXTRACT(YEAR FROM usage_date) AS usage_year,
+                          EXTRACT(MONTH FROM usage_date) AS usage_month,
+                          gcp_allocation AS allocation,
+                          'GCP' AS cloud_provider,
+                          SUM(gcp_cost) AS cloud_cost
+                        FROM gcp_billing
+                        GROUP BY 1, 2, 3
+
+                        UNION ALL
+
+                        SELECT
+                          EXTRACT(YEAR FROM sf_start_time) AS usage_year,
+                          EXTRACT(MONTH FROM sf_start_time) AS usage_month,
+                          sf_allocation AS allocation,
+                          'Snowflake' AS cloud_provider,
+                          SUM(sf_amount) AS cloud_cost
+                        FROM snowflake_billing
+                        GROUP BY 1, 2, 3
+                      )
+
+                      SELECT
+                        usage_year,
+                        usage_month,
+                        allocation,
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'Azure' THEN cloud_cost END), 0) AS azure_cost,
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'GCP' THEN cloud_cost END), 0) AS gcp_cost,
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'Snowflake' THEN cloud_cost END), 0) AS snowflake_cost,
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'Azure' THEN cloud_cost END), 0) +
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'GCP' THEN cloud_cost END), 0) +
+                        COALESCE(MAX(CASE WHEN cloud_provider = 'Snowflake' THEN cloud_cost END), 0) AS total_cost
+                      FROM unified_costs
+                      GROUP BY usage_year, usage_month, allocation
+                      ORDER BY usage_year, usage_month, allocation
+
+
+            outputs:
+              - name: combined_tables
+                dataset: dataos://lakehouse:nivedhaa/combined_cloud_tables?acl=rw
+                format: Iceberg
+                description: Combined tables of Azure, Snowflake and GCP
+                title: combined_tables
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip

@@ -4,10 +4,7 @@ tables:
     description: "Detailed usage and billing data extracted from Snowflake warehouses, including region, team allocation, credits, and monetary cost for each billing cycle."
     public: true
 
-    joins:
-      - name: azure_billing
-        relationship: one_to_one
-        sql: "{TABLE.sf_allocation}={azure_billing.azure_allocation}" 
+
 
     #   - name: modem_prediction
     #     relationship: many_to_one
