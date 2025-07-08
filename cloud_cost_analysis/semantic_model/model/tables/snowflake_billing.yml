@@ -5,10 +5,10 @@ tables:
     public: true
 
 
-
-    #   - name: modem_prediction
-    #     relationship: many_to_one
-    #     sql: "{TABLE.modem_id}={modem_prediction.modem_id}"
+    joins:
+      - name: combined_cloud_tables
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
 
     dimensions:
       - name: sf_start_time

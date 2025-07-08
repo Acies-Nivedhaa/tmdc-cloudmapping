@@ -4,18 +4,18 @@ tables:
     description: "Combined cloud cost analysis table aggregating monthly costs across Azure, GCP, and Snowflake by allocation and year/month."
     public: true
     
-    joins:
-      - name: azure_billing
-        relationship: one_to_one
-        sql: "{TABLE.allocation}={azure_billing.standardized_allocation} AND {TABLE.usage_year}={azure_billing.usage_year} AND {TABLE.usage_month}={azure_billing.usage_month}"
+    # joins:
+    #   - name: azure_billing
+    #     relationship: one_to_one
+    #     sql: "{TABLE.allocation}={azure_billing.standardized_allocation} AND {TABLE.usage_year}={azure_billing.usage_year} AND {TABLE.usage_month}={azure_billing.usage_month}"
 
-      - name: gcp_billing
-        relationship: one_to_one
-        sql: "{TABLE.allocation}={gcp_billing.gcp_allocation} AND {TABLE.usage_year}={gcp_billing.usage_year} AND {TABLE.usage_month}={gcp_billing.usage_month}"
+    #   - name: gcp_billing
+    #     relationship: one_to_one
+    #     sql: "{TABLE.allocation}={gcp_billing.gcp_allocation} AND {TABLE.usage_year}={gcp_billing.usage_year} AND {TABLE.usage_month}={gcp_billing.usage_month}"
 
-      - name: snowflake_billing
-        relationship: one_to_one
-        sql: "{TABLE.allocation}={snowflake_billing.sf_allocation} AND {TABLE.usage_year}={snowflake_billing.sf_year} AND {TABLE.usage_month}={snowflake_billing.sf_month}" 
+    #   - name: snowflake_billing
+    #     relationship: one_to_one
+    #     sql: "{TABLE.allocation}={snowflake_billing.sf_allocation} AND {TABLE.usage_year}={snowflake_billing.sf_year} AND {TABLE.usage_month}={snowflake_billing.sf_month}" 
 
 
     dimensions:

@@ -1,0 +1,79 @@
+tables:
+  - name: combined_predictions
+    sql: {{ load_sql('combined_predictions') }}
+    description: "Predicted and actual cloud costs by allocation, year, and month for Azure, GCP, and Snowflake."
+    public: true
+
+    joins:
+      - name: combined_cloud_tables
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
+
+    dimensions:
+      - name: allocation
+        column: allocation
+        type: string
+        description: "The team or department allocation for the cloud spend."
+        primary_key: true
+        public: true
+
+      - name: year
+        column: year
+        type: number
+        description: "The year for the cost prediction and actuals."
+        public: true
+
+      - name: month
+        column: month
+        type: number
+        description: "The month for the cost prediction and actuals."
+        public: true
+
+    measures:
+      - name: actual_azure_cost
+        sql: actual_azure_cost
+        type: number
+        description: "Actual Azure cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: predicted_azure_cost
+        sql: predicted_azure_cost
+        type: number
+        description: "Predicted Azure cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: actual_gcp_cost
+        sql: actual_gcp_cost
+        type: number
+        description: "Actual GCP cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: predicted_gcp_cost
+        sql: predicted_gcp_cost
+        type: number
+        description: "Predicted GCP cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: actual_snowflake_cost
+        sql: actual_snowflake_cost
+        type: number
+        description: "Actual Snowflake cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: predicted_snowflake_cost
+        sql: predicted_snowflake_cost
+        type: number
+        description: "Predicted Snowflake cloud cost for the allocation, year, and month."
+        public: true
+
+      - name: actual_total_cost
+        sql: actual_total_cost
+        type: number
+        description: "Actual total cloud cost (sum of all clouds) for the allocation, year, and month."
+        public: true
+
+      - name: predicted_total_cost
+        sql: predicted_total_cost
+        type: number
+        description: "Predicted total cloud cost (sum of all clouds) for the allocation, year, and month."
+        public: true

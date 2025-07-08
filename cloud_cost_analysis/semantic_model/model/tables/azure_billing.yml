@@ -4,12 +4,11 @@ tables:
     description: "Raw Azure billing extract capturing team-level cost, region, and resource metadata for cloud usage analysis."
     public: true
 
-    # joins:
-    #   - name: gcp_billing
-    #     relationship: one_to_one
-    #     sql: "{TABLE.azure_allocation}={gcp_billing.gcp_allocation}" 
-
-
+    joins:
+      - name: combined_cloud_tables
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
+        
     dimensions:
       - name: azure_usage_date
         column: azure_usage_date

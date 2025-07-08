@@ -1,0 +1,70 @@
+version: v1  # v1
+name: model-pred-flare
+type: workflow
+tags:
+  - Cloud Cost Analysis
+  - Model Predictions
+description: Ingesting model predictions into lakehouse
+workflow:
+  # schedule:
+  #   cron: '00 20 * * *'
+  #   endOn: '2025-07-30T22:00:00Z'
+  #   concurrencyPolicy: Forbid
+  dag:
+    - name: dg-model-pred-flare
+      title: Model Predictions Ingestion
+      description: The job ingests model predictions into lakehouse
+      spec:
+        tags:
+          - Cloud Cost Analysis
+          - Model Predictions
+        stack: flare:6.0
+        compute: runnable-default
+        stackSpec:
+          driver:
+            coreLimit: 1200m
+            cores: 1
+            memory: 1200m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1200m
+          job:
+            explain: true
+            inputs:
+              - name: pred_input
+                dataset: dataos://thirdparty01:cloud_cost/merged_forcast/merged_forecast_table.csv?acl=rw
+                format: csv
+                options:
+                  header: true
+                  inferSchema: true
+                  sep: ','
+
+            logLevel: INFO
+            outputs:
+              - name: pred_output
+                dataset: dataos://lakehouse:nivedhaa/cloud_predictions?acl=rw
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+            steps:
+              - sequence:
+                  - name: pred_output
+                    sql: >
+                      SELECT
+                          `combined_cloud_tables.allocation` as allocation,
+                          CAST(year AS INT) as year,
+                          CAST(month AS INT) as month,
+                          CAST(actual_azure AS DOUBLE) AS actual_azure_cost,
+                          CAST(predicted_azure AS DOUBLE) AS predicted_azure_cost,
+                          CAST(actual_gcp AS DOUBLE) AS actual_gcp_cost,
+                          CAST(actual_snowflake AS DOUBLE) AS actual_snowflake_cost,
+                          CAST(predicted_snowflake AS DOUBLE) AS predicted_snowflake_cost,
+                          CAST(actual_total AS DOUBLE) AS actual_total_cost,
+                          CAST(predicted_total AS DOUBLE) AS predicted_total_cost
+                      FROM
+                          pred_input

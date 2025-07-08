@@ -29,23 +29,17 @@ v1beta:
 
     inputs:
       - refType: dataos
-        ref: dataos://thirdparty01:cloud_cost/azure/DataPoint_AzureCost_JulyToSept2024_LastOne.xlsx
-
-      - refType: dataos
-        ref: dataos://thirdparty01:cloud_cost/snowflake/SF_CostResults_JulyToSept2024_LatestOne.xlsx
-
-      - refType: dataos
-        ref: dataos://thirdparty01:cloud_cost/gcp/simulated_gcp_billing_data.csv
-
-    outputs:
-      - refType: dataos
         ref: dataos://lakehouse:nivedhaa/azure_cost
 
       - refType: dataos
         ref: dataos://lakehouse:nivedhaa/snowflake_cost
 
       - refType: dataos
-        ref: dataos://lakehouse:nivedhaa/gcp_billing_table
+        ref: dataos://lakehouse:nivedhaa/gcp_bill
+
+    outputs:
+      - refType: dataos
+        ref: dataos://lakehouse:nivedhaa/combined_cloud_tables
 
     ports:
       lens:
