@@ -16,7 +16,10 @@ tables:
     #   - name: snowflake_billing
     #     relationship: one_to_one
     #     sql: "{TABLE.allocation}={snowflake_billing.sf_allocation} AND {TABLE.usage_year}={snowflake_billing.sf_year} AND {TABLE.usage_month}={snowflake_billing.sf_month}" 
-
+    joins:
+      - name: combined_cloud_tables
+        relationship: one_to_one
+        sql: "{TABLE.allocation}={combined_predictions.allocation}"
 
     dimensions:
       - name: usage_year
