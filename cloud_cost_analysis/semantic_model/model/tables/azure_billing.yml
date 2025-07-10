@@ -7,7 +7,7 @@ tables:
     joins:
       - name: combined_cloud_tables
         relationship: one_to_one
-        sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
+        sql: "{TABLE.standardized_allocation}={combined_cloud_tables.allocation}"
         
     dimensions:
       - name: azure_usage_date

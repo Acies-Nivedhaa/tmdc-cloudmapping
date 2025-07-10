@@ -38,7 +38,7 @@ v1beta:
         ref: dataos://lakehouse:nivedhaa/gcp_bill
 
       - refType: dataos
-        ref: dataos://lakehouse:nivedhaa/cloud_predictions
+        ref: dataos://lakehouse:nivedhaa/cloud_predictions_table
 
     outputs:
       - refType: dataos
