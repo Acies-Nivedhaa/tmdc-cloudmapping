@@ -1,5 +1,5 @@
 version: v1  # v1
-name: model-pred-flare
+name: model-prediction-flare
 type: workflow
 tags:
   - Cloud Cost Analysis
@@ -11,7 +11,7 @@ workflow:
   #   endOn: '2025-07-30T22:00:00Z'
   #   concurrencyPolicy: Forbid
   dag:
-    - name: dg-model-pred-flare
+    - name: dg-model-prediction-flare
       title: Model Predictions Ingestion
       description: The job ingests model predictions into lakehouse
       spec:
@@ -44,7 +44,7 @@ workflow:
             logLevel: INFO
             outputs:
               - name: pred_output
-                dataset: dataos://lakehouse:nivedhaa/cloud_predictions?acl=rw
+                dataset: dataos://lakehouse:nivedhaa/cloud_predictions_table?acl=rw
                 options:
                   saveMode: overwrite
                   iceberg:
@@ -62,6 +62,7 @@ workflow:
                           CAST(actual_azure AS DOUBLE) AS actual_azure_cost,
                           CAST(predicted_azure AS DOUBLE) AS predicted_azure_cost,
                           CAST(actual_gcp AS DOUBLE) AS actual_gcp_cost,
+                          CAST(predicted_gcp AS DOUBLE) AS predicted_gcp_cost,
                           CAST(actual_snowflake AS DOUBLE) AS actual_snowflake_cost,
                           CAST(predicted_snowflake AS DOUBLE) AS predicted_snowflake_cost,
                           CAST(actual_total AS DOUBLE) AS actual_total_cost,

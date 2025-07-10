@@ -11,5 +11,5 @@ select
     actual_total_cost,
     predicted_total_cost
 from 
-    lakehouse.nivedhaa.cloud_predictions
+    lakehouse.nivedhaa.cloud_predictions_table
     
