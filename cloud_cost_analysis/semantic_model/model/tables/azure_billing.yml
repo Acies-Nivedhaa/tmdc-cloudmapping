@@ -7,7 +7,7 @@ tables:
     joins:
       - name: combined_cloud_tables
         relationship: one_to_one
-        sql: "{TABLE.standardized_allocation}={combined_cloud_tables.allocation}"
+        sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
         
     dimensions:
       - name: azure_usage_date
@@ -20,7 +20,7 @@ tables:
         type: string
         description: "The Azure region where the resource was deployed"
 
-      - name: standardized_allocation
+      - name: allocation
         column: standardized_allocation
         type: string
         description: "The standardized team or department responsible for the cloud spend"
