@@ -16,6 +16,7 @@ tables:
         type: time
         description: "The start date of the Snowflake warehouse usage session."
         primary_key: true
+        public: true
 
       - name: sf_end_time
         column: sf_end_time
@@ -77,12 +78,12 @@ tables:
         description: "Total Snowflake cloud cost across all records."
         public: true
 
-      - name: chargeback_percent
-        title: Snowflake Chargeback Percent
-        sql: AVG(sf_chargeback)
-        type: number
-        description: "Average chargeback percent for Snowflake (if numeric, else placeholder)."
-        public: true
+      # - name: chargeback_percent
+      #   title: Snowflake Chargeback Percent
+      #   sql: AVG(sf_chargeback)
+      #   type: number
+      #   description: "Average chargeback percent for Snowflake (if numeric, else placeholder)."
+      #   public: true
 
       # - name: forecasted_cost
       #   title: Forecasted Snowflake Cost (Placeholder)

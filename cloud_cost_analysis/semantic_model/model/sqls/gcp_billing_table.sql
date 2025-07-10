@@ -1,5 +1,5 @@
 SELECT
-    usage_date,
+    CAST(usage_date AS TIMESTAMP) AS usage_date,
     gcp_region,
     gcp_project_name,
     gcp_service_description,

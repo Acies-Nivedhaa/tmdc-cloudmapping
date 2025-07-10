@@ -1,6 +1,6 @@
 SELECT
-    sf_start_time,
-    sf_end_time,
+    CAST(sf_start_time AS TIMESTAMP) AS sf_start_time,
+    CAST(sf_end_time AS TIMESTAMP) AS sf_end_time,
     sf_region,
     sf_globallocal,
     sf_accountname,
