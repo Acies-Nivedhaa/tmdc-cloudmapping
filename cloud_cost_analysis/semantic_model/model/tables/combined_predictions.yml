@@ -29,7 +29,6 @@ tables:
         description: "The month for the cost prediction and actuals."
         public: true
 
-    measures:
       - name: actual_azure_cost
         sql: actual_azure_cost
         type: number

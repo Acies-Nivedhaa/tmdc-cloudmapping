@@ -5,7 +5,7 @@ type: data
 tags:
   - DPDomain.CloudOps
   - DPUsecase.Cloud Cost Analysis
-  - DPTier.Source Aligned
+  - DPTier.Consumer Aligned
 
 description: Cloud cost mapping analysis
 
