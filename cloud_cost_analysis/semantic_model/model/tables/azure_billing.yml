@@ -21,7 +21,7 @@ tables:
         description: "The Azure region where the resource was deployed"
 
       - name: allocation
-        column: standardized_allocation
+        column: allocation
         type: string
         description: "The standardized team or department responsible for the cloud spend"
         primary_key: true
