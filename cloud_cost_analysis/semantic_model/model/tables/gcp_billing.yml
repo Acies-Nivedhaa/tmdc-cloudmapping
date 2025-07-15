@@ -15,6 +15,7 @@ tables:
         type: time
         description: "The date when the GCP cloud resource usage occurred."
         primary_key: true
+        public: true
 
       - name: gcp_region
         column: gcp_region
