@@ -12,6 +12,7 @@ tables:
     dimensions:
       - name: usage_date
         column: usage_date
+        type: time
         description: "The date when the GCP cloud resource usage occurred."
         primary_key: true
         public: true
