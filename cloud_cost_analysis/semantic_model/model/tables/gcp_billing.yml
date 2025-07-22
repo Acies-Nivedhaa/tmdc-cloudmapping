@@ -10,9 +10,8 @@ tables:
         sql: "{TABLE.allocation}={combined_cloud_tables.allocation}"
 
     dimensions:
-      - name: usage_start_time
-        column: usage_start_time
-        type: time
+      - name: usage_date
+        column: usage_date
         description: "The date when the GCP cloud resource usage occurred."
         primary_key: true
         public: true
