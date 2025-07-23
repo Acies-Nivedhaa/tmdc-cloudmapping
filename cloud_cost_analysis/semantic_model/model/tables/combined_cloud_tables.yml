@@ -103,17 +103,6 @@ tables:
         description: "Percentage of total cost attributed to Snowflake."
         public: true
 
-      - name: month_over_month_change_value
-        title: Month-over-Month Change (Value)
-        sql: >
-            (({TABLE.total_cost} - LAG({TABLE.total_cost}) OVER (
-              PARTITION BY {TABLE.allocation}
-              ORDER BY {TABLE.usage_year}, {TABLE.usage_month})) / NULLIF(LAG({TABLE.total_cost}) OVER (
-              PARTITION BY {TABLE.allocation}
-              ORDER BY {TABLE.usage_year}, {TABLE.usage_month}), 0))
-        type: number
-        description: "Absolute difference in total cost from the previous month for each allocation."
-        public: true
 
 
 
