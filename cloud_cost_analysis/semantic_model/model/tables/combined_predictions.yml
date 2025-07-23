@@ -76,3 +76,11 @@ tables:
         type: number
         description: "Predicted total cloud cost (sum of all clouds) for the allocation, year, and month."
         public: true
+
+      - name: mom_diff
+        sql: >
+            (({TABLE.total_cost} - LAG({TABLE.total_cost}) OVER (
+            PARTITION BY {TABLE.allocation}
+            ORDER BY {TABLE.usage_year}, {TABLE.usage_month})) / NULLIF(LAG({TABLE.total_cost}) OVER (
+            PARTITION BY {TABLE.allocation}
+            ORDER BY {TABLE.usage_year}, {TABLE.usage_month}), 0))
