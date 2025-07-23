@@ -4,20 +4,6 @@ tables:
     description: "Combined cloud cost analysis table aggregating monthly costs across Azure, GCP, and Snowflake by allocation and year/month."
     public: true
     
-    # joins:
-    #   - name: azure_billing
-    #     relationship: one_to_one
-    #     sql: "{TABLE.allocation}={azure_billing.standardized_allocation} AND {TABLE.usage_year}={azure_billing.usage_year} AND {TABLE.usage_month}={azure_billing.usage_month}"
-
-    #   - name: gcp_billing
-    #     relationship: one_to_one
-    #     sql: "{TABLE.allocation}={gcp_billing.gcp_allocation} AND {TABLE.usage_year}={gcp_billing.usage_year} AND {TABLE.usage_month}={gcp_billing.usage_month}"
-
-    #   - name: snowflake_billing
-    #     relationship: one_to_one
-    #     sql: "{TABLE.allocation}={snowflake_billing.sf_allocation} AND {TABLE.usage_year}={snowflake_billing.sf_year} AND {TABLE.usage_month}={snowflake_billing.sf_month}" 
-
-
     dimensions:
       - name: usage_year
         column: usage_year
@@ -117,37 +103,31 @@ tables:
         description: "Percentage of total cost attributed to Snowflake."
         public: true
 
-      - name: month_over_month_change_pct
-        title: Month-over-Month Change (%)
-        sql: >
-          WITH monthly_costs AS (
-            SELECT
-              {TABLE}.allocation,
-              {TABLE}.usage_year,
-              {TABLE}.usage_month,
-              SUM({TABLE}.total_cost) AS total_monthly_cost
-            FROM {TABLE}
-            GROUP BY {TABLE}.allocation, {TABLE}.usage_year, {TABLE}.usage_month
-          )
-
-          SELECT
-            CASE
-              WHEN LAG(total_monthly_cost) OVER (
-                PARTITION BY allocation ORDER BY usage_year, usage_month
-              ) IS NULL THEN NULL
-              WHEN LAG(total_monthly_cost) OVER (
-                PARTITION BY allocation ORDER BY usage_year, usage_month
-              ) = 0 THEN NULL
-              ELSE (
-                (total_monthly_cost - LAG(total_monthly_cost) OVER (
-                  PARTITION BY allocation ORDER BY usage_year, usage_month
-                )) / LAG(total_monthly_cost) OVER (
-                  PARTITION BY allocation ORDER BY usage_year, usage_month
-                ) * 100
-              )
-            END
-          FROM monthly_costs
+      - name: mom_change_pct
+        title: Month-over-Month Change %
+        sql: |
+          CASE
+            WHEN LAG({TABLE.total_cost}) OVER (
+              PARTITION BY {TABLE.allocation}
+              ORDER BY {TABLE.usage_year}, {TABLE.usage_month}
+            ) IS NULL THEN NULL
+            WHEN LAG({TABLE.total_cost}) OVER (
+              PARTITION BY {TABLE.allocation}
+              ORDER BY {TABLE.usage_year}, {TABLE.usage_month}
+            ) = 0 THEN NULL
+            ELSE (
+              ({TABLE.total_cost} - LAG({TABLE.total_cost}) OVER (
+                PARTITION BY {TABLE.allocation}
+                ORDER BY {TABLE.usage_year}, {TABLE.usage_month}
+              )) / LAG({TABLE.total_cost}) OVER (
+                PARTITION BY {TABLE.allocation}
+                ORDER BY {TABLE.usage_year}, {TABLE.usage_month}
+              ) * 100
+            )
+          END
         type: number
-        description: "Month-over-month percentage change in total cost per allocation, based on usage_year and usage_month."
+        description: "Month-over-month percentage change in total cost for each allocation."
         public: true
+
+
 
