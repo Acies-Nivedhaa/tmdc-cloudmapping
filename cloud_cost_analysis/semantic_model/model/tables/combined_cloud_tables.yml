@@ -104,18 +104,6 @@ tables:
         public: true
 
 
-      - name: mom_diff
-        title: Month on Month Difference
-        sql: >
-            (({TABLE.total_cost} - LAG({TABLE.total_cost}) OVER (
-            PARTITION BY {TABLE.allocation}
-            ORDER BY {TABLE.usage_year}, {TABLE.usage_month})) / NULLIF(LAG({TABLE.total_cost}) OVER (
-            PARTITION BY {TABLE.allocation}
-            ORDER BY {TABLE.usage_year}, {TABLE.usage_month}), 0))
-        type: number
-        description: "Month on Month difference of billing"
-        public: true
-
 
 
 
